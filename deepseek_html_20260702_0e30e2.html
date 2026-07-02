@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>Karachi Pizza POS</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0b0b0b; color: #f5f5f5; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1f1f1f; }
+    ::-webkit-scrollbar-thumb { background: #f97316; border-radius: 8px; }
+    .card-glass { background: rgba(30, 30, 30, 0.7); backdrop-filter: blur(6px); border: 1px solid rgba(249, 115, 22, 0.15); border-radius: 24px; transition: all 0.2s ease; }
+    .card-glass:hover { border-color: #f97316; box-shadow: 0 8px 30px rgba(249, 115, 22, 0.08); }
+    .btn-orange { background: #f97316; color: #0b0b0b; font-weight: 600; transition: 0.2s; border: none; cursor: pointer; }
+    .btn-orange:hover { background: #ea580c; transform: scale(0.97); }
+    .sidebar { background: #121212; border-right: 1px solid #2a2a2a; }
+    .sidebar-item { transition: 0.15s; cursor: pointer; padding: 0.75rem 1rem; border-radius: 14px; margin: 4px 8px; display: flex; align-items: center; gap: 14px; }
+    .sidebar-item:hover, .sidebar-item.active { background: #f97316; color: #0b0b0b; }
+    .sidebar-item i { width: 24px; text-align: center; }
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .menu-item { background: #1e1e1e; border-radius: 20px; padding: 14px 10px; text-align: center; transition: 0.15s; border: 1px solid transparent; cursor: pointer; }
+    .menu-item:hover { border-color: #f97316; background: #262626; transform: translateY(-2px); }
+    .menu-item .price { color: #f97316; font-weight: 700; }
+    .cart-item { background: #1a1a1a; border-radius: 16px; padding: 10px 14px; margin-bottom: 8px; border-left: 4px solid #f97316; }
+    .input-dark { background: #1f1f1f; border: 1px solid #333; color: #f5f5f5; border-radius: 14px; padding: 10px 14px; width: 100%; }
+    .input-dark:focus { outline: 2px solid #f97316; border-color: transparent; }
+    .tab-btn { padding: 8px 18px; border-radius: 40px; background: #222; color: #aaa; font-weight: 500; transition: 0.15s; cursor: pointer; border: none; }
+    .tab-btn.active { background: #f97316; color: #0b0b0b; }
+    @media (max-width: 640px) { .menu-grid { grid-template-columns: repeat(2, 1fr); } }
+    #root { min-height: 100vh; }
+    
+    /* Login Page */
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0b0b0b;
+      padding: 20px;
+    }
+    .login-box {
+      background: rgba(18, 18, 18, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(249, 115, 22, 0.15);
+      border-radius: 32px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .login-box .logo { text-align: center; margin-bottom: 32px; }
+    .login-box .logo h1 { font-size: 2.5rem; font-weight: 700; color: #f97316; }
+    .login-box .logo p { color: #888; font-size: 0.95rem; margin-top: 4px; }
+    .login-box .logo .icon { font-size: 3.5rem; margin-bottom: 8px; }
+    .login-box .input-group { margin-bottom: 20px; }
+    .login-box .input-group label { display: block; color: #aaa; font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; }
+    .login-box .input-group .input-wrapper { position: relative; }
+    .login-box .input-group .input-wrapper i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #555;
+    }
+    .login-box .input-group input {
+      width: 100%;
+      padding: 12px 14px 12px 44px;
+      background: #1a1a1a;
+      border: 2px solid #2a2a2a;
+      border-radius: 14px;
+      color: #f5f5f5;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    .login-box .input-group input:focus {
+      outline: none;
+      border-color: #f97316;
+      background: #222;
+    }
+    .login-box .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: #f97316;
+      color: #0b0b0b;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .login-box .btn-login:hover {
+      background: #ea580c;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(249, 115, 22, 0.3);
+    }
+    .login-box .demo-credentials {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 12px 16px;
+      border: 1px solid #2a2a2a;
+      margin-top: 20px;
+    }
+    .login-box .demo-credentials .row {
+      display: flex;
+      justify-content: space-between;
+      color: #888;
+      font-size: 0.85rem;
+      padding: 4px 0;
+    }
+    .login-box .demo-credentials .row span:last-child {
+      color: #f97316;
+      font-weight: 500;
+    }
+    .login-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .login-error.show { display: block; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+
+// ---------- MENU DATA ----------
+const MENU_DATA = {
+  Pizza: [
+    { name: 'Crown Crust Pizza', variants: [{ size: 'Small', price: 1499 }, { size: 'Medium', price: 1999 }] },
+    { name: 'Lazania Pizza', variants: [{ size: 'Small', price: 1699 }, { size: 'Medium', price: 2199 }] },
+    { name: 'Malai Boti Pizza', variants: [{ size: 'Small', price: 459 }, { size: 'Medium', price: 1099 }, { size: 'Large', price: 1799 }] },
+    { name: 'Fajita Pizza', variants: [{ size: 'Small', price: 450 }, { size: 'Medium', price: 950 }, { size: 'Large', price: 1550 }] },
+    { name: 'Tikka Pizza', variants: [{ size: 'Small', price: 499 }, { size: 'Medium', price: 999 }, { size: 'Large', price: 1499 }] },
+    { name: 'Supreme Pizza', variants: [{ size: 'Small', price: 450 }, { size: 'Medium', price: 999 }, { size: 'Large', price: 1599 }] },
+    { name: 'Hot & Spicy Pizza', variants: [{ size: 'Small', price: 499 }, { size: 'Medium', price: 999 }, { size: 'Large', price: 1499 }] },
+    { name: 'KBS Pizza', variants: [{ size: 'Small', price: 599 }, { size: 'Medium', price: 1199 }, { size: 'Large', price: 1899 }] },
+    { name: 'Extra Toppings', variants: [{ size: 'Small', price: 150 }, { size: 'Medium', price: 250 }, { size: 'Large', price: 350 }] },
+  ],
+  Burgers: [
+    { name: 'KBS Special Pizza Burger', price: 499 }, { name: 'Zinger Burger', price: 350 }, { name: 'Zinger Cheese Burger', price: 400 },
+    { name: 'Chicken Grill Burger', price: 300 }, { name: 'Chicken Grill Cheese Burger', price: 350 }, { name: 'Classic Chicken Burger', price: 300 },
+    { name: 'Classic Chicken Cheese Burger', price: 250 }, { name: 'Beef Patti Burger', price: 250 }, { name: 'Beef Patti Cheese Burger', price: 300 }
+  ],
+  BBQ: [
+    { name: 'Chicken Tikka Breast Piece', price: 399 }, { name: 'Chicken Tikka Leg Piece', price: 399 }, 
+    { name: 'Chicken Tikka Boti Boneless', price: 450 }, { name: 'Malai Boti Boneless', price: 499 },
+    { name: 'Beef Boti', price: 450 }, { name: 'Seekh Kebab 6 pcs', price: 499 },
+    { name: 'Reshmi Kebab 6 pcs', price: 499 }, { name: 'Namkeen Tikka Chicken', price: 499 },
+    { name: 'Namkeen Afghani Beef Boti Seekh', price: 200 }, { name: 'Grill Fish BBQ', price: 'Seasonal' }
+  ],
+  Karahi: [
+    { name: 'Chicken Karahi Full', price: 1999 }, { name: 'Chicken Karahi Half', price: 999 },
+    { name: 'Beef Karahi Full', price: 2499 }, { name: 'Beef Karahi Half', price: 1199 },
+    { name: 'Mutton Karahi Full', price: 3499 }, { name: 'Mutton Karahi Half', price: 1899 }
+  ],
+  Handi: [
+    { name: 'Chicken Handi Full', price: 2000 }, { name: 'Chicken Handi Half', price: 1000 },
+    { name: 'Beef Handi Full', price: 1999 }, { name: 'Beef Handi Half', price: 1199 },
+    { name: 'Mutton Handi Full', price: 3299 }, { name: 'Mutton Handi Half', price: 1599 }
+  ],
+  Shakes: [
+    { name: 'Mango Juice', price: 250 }, { name: 'Banana Juice', price: 250 },
+    { name: 'Apple Juice', price: 250 }, { name: 'Strawberry Juice', price: 250 }
+  ],
+  'Ice Cream': [
+    { name: 'Sada Ice Cream', price: 150 }, { name: 'Special Ice Cream', price: 250 },
+    { name: 'Strawberry Ice Cream', price: 250 }
+  ],
+  Falooda: [{ name: 'Special Falooda', price: 250 }],
+  'Biryani & Pulao': [
+    { name: 'Chicken Biryani Full', price: 400 }, { name: 'Chicken Biryani Half', price: 200 },
+    { name: 'Chicken Biryani Sada', price: 100 }, { name: 'Beef Pulao Full', price: 500 },
+    { name: 'Beef Pulao Half', price: 250 }, { name: 'Sada Pulao', price: 150 }
+  ],
+  'Rolls & Shawarma': [
+    { name: 'Chicken Shawarma', price: 200 }, { name: 'Chicken Cheese Shawarma', price: 250 },
+    { name: 'Shawarma Platter', price: 350 }, { name: 'Chicken Tikka Roll', price: 250 },
+    { name: 'Beef Garlic Roll', price: 250 }
+  ],
+  'French Fries': [
+    { name: 'KBS Pizza Fries', price: 599 }, { name: 'Loaded Fries', price: 499 },
+    { name: 'Masala Fries', price: 250 }, { name: 'Masala Cheese Fries', price: 300 },
+    { name: 'Plain Fries', price: 200 }
+  ]
+};
+
+// Flatten menu
+const flatMenu = [];
+Object.entries(MENU_DATA).forEach(([category, items]) => {
+  items.forEach(item => {
+    if (item.variants) {
+      item.variants.forEach(v => {
+        flatMenu.push({ name: `${item.name} (${v.size})`, price: v.price, category, size: v.size });
+      });
+    } else {
+      flatMenu.push({ name: item.name, price: item.price, category });
+    }
+  });
+});
+
+let ordersDB = [];
+
+// ---------- LOGIN COMPONENT ----------
+const Login = ({ onLogin }) => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (username === 'manager' && password === '1234') {
+      setError('');
+      onLogin();
+    } else {
+      setError('Invalid credentials. Try: manager / 1234');
+    }
+  };
+
+  return (
+    <div className="login-container">
+      <div className="login-box">
+        <div className="logo">
+          <div className="icon">🍕</div>
+          <h1>Karachi Pizza</h1>
+          <p>Restaurant POS System</p>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className={`login-error ${error ? 'show' : ''}`}>
+            <i className="fas fa-exclamation-circle" style={{ marginRight: '8px' }}></i>
+            {error}
+          </div>
+          <div className="input-group">
+            <label>Username</label>
+            <div className="input-wrapper">
+              <i className="fas fa-user"></i>
+              <input type="text" placeholder="Enter username" value={username} onChange={e => setUsername(e.target.value)} required />
+            </div>
+          </div>
+          <div className="input-group">
+            <label>Password</label>
+            <div className="input-wrapper">
+              <i className="fas fa-lock"></i>
+              <input type="password" placeholder="Enter password" value={password} onChange={e => setPassword(e.target.value)} required />
+            </div>
+          </div>
+          <button type="submit" className="btn-login">
+            <i className="fas fa-sign-in-alt" style={{ marginRight: '10px' }}></i>
+            Sign In
+          </button>
+        </form>
+        <div className="demo-credentials">
+          <div className="row"><span>Demo Username:</span><span>manager</span></div>
+          <div className="row"><span>Demo Password:</span><span>1234</span></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ---------- MAIN APP ----------
+const App = () => {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [view, setView] = useState('dashboard');
+  const [cart, setCart] = useState([]);
+  const [orderType, setOrderType] = useState('Dine In');
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
+  const [discount, setDiscount] = useState(0);
+  const [tax] = useState(0.1);
+  const [serviceCharge, setServiceCharge] = useState(0);
+  const [notes, setNotes] = useState('');
+  const [extraCheese, setExtraCheese] = useState(false);
+  const [extraSauce, setExtraSauce] = useState(false);
+  const [extraToppings, setExtraToppings] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    if (ordersDB.length === 0) {
+      for (let i = 0; i < 8; i++) {
+        const randItem = flatMenu[Math.floor(Math.random() * flatMenu.length)];
+        ordersDB.push({
+          id: 'ORD' + String(i + 100).padStart(3, '0'),
+          date: new Date(Date.now() - i * 3600000).toLocaleString(),
+          items: [{ ...randItem, qty: 1 + Math.floor(Math.random() * 3) }],
+          orderType: ['Dine In', 'Take Away', 'Delivery'][i % 3],
+          paymentMethod: ['Cash', 'Card', 'Bank Transfer', 'Mobile Wallet'][i % 4],
+          subtotal: randItem.price * 2,
+          tax: randItem.price * 0.1,
+          discount: 0,
+          serviceCharge: 50,
+          total: randItem.price * 2 * 1.1 + 50,
+          status: ['Pending', 'Preparing', 'Ready', 'Completed', 'Cancelled'][i % 5],
+          customer: i % 2 === 0 ? 'Ali Khan' : 'Sara Ahmed'
+        });
+      }
+      setOrders([...ordersDB]);
+    }
+  }, []);
+
+  const addToCart = (item) => {
+    const existing = cart.find(i => i.name === item.name && i.size === item.size);
+    if (existing) {
+      setCart(cart.map(i => i.name === item.name && i.size === item.size ? { ...i, qty: i.qty + 1 } : i));
+    } else {
+      setCart([...cart, { ...item, qty: 1 }]);
+    }
+  };
+
+  const removeItem = (idx) => setCart(cart.filter((_, i) => i !== idx));
+  const updateQty = (idx, delta) => {
+    const newCart = [...cart];
+    if (newCart[idx].qty + delta <= 0) { newCart.splice(idx, 1); } else { newCart[idx].qty += delta; }
+    setCart(newCart);
+  };
+
+  const calcTotal = () => {
+    let sub = cart.reduce((acc, i) => acc + (i.price || 0) * i.qty, 0);
+    if (extraCheese) sub += 150;
+    if (extraSauce) sub += 100;
+    if (extraToppings) sub += 200;
+    let taxAmt = sub * tax;
+    let discAmt = sub * (discount / 100);
+    let total = sub + taxAmt + serviceCharge - discAmt;
+    return { subtotal: sub, tax: taxAmt, discount: discAmt, total };
+  };
+
+  const saveOrder = () => {
+    if (cart.length === 0) { alert('Cart is empty!'); return; }
+    const { subtotal, tax: taxAmt, discount: discAmt, total } = calcTotal();
+    const order = {
+      id: 'ORD' + String(ordersDB.length + 1).padStart(3, '0'),
+      date: new Date().toLocaleString(),
+      items: cart,
+      orderType, paymentMethod, subtotal, tax: taxAmt, discount: discAmt, serviceCharge, total,
+      notes, extraCheese, extraSauce, extraToppings,
+      status: 'Completed', customer: 'Walk-in'
+    };
+    ordersDB = [order, ...ordersDB];
+    setOrders([...ordersDB]);
+    setCart([]);
+    setNotes('');
+    setExtraCheese(false);
+    setExtraSauce(false);
+    setExtraToppings(false);
+    setDiscount(0);
+    setServiceCharge(0);
+    alert('✅ Order #' + order.id + ' saved!');
+  };
+
+  const stats = useMemo(() => {
+    const today = new Date().toDateString();
+    const todayOrders = orders.filter(o => new Date(o.date).toDateString() === today);
+    const totalSales = todayOrders.reduce((s, o) => s + o.total, 0);
+    const customers = [...new Set(todayOrders.map(o => o.customer).filter(Boolean))];
+    return {
+      todaySales: totalSales, todayCustomers: customers.length, todayOrders: todayOrders.length,
+      pending: orders.filter(o => o.status === 'Pending').length,
+      completed: orders.filter(o => o.status === 'Completed').length,
+      cancelled: orders.filter(o => o.status === 'Cancelled').length,
+      cash: orders.filter(o => o.paymentMethod === 'Cash').reduce((s, o) => s + o.total, 0),
+      card: orders.filter(o => o.paymentMethod === 'Card').reduce((s, o) => s + o.total, 0),
+      bank: orders.filter(o => o.paymentMethod === 'Bank Transfer').reduce((s, o) => s + o.total, 0),
+      wallet: orders.filter(o => o.paymentMethod === 'Mobile Wallet').reduce((s, o) => s + o.total, 0),
+      totalRevenue: orders.reduce((s, o) => s + o.total, 0),
+      avgOrder: orders.length ? orders.reduce((s, o) => s + o.total, 0) / orders.length : 0
+    };
+  }, [orders]);
+
+  const filteredMenu = useMemo(() => {
+    let items = flatMenu;
+    if (selectedCategory !== 'All') items = items.filter(i => i.category === selectedCategory);
+    if (searchTerm) items = items.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    return items;
+  }, [selectedCategory, searchTerm]);
+
+  if (!loggedIn) {
+    return <Login onLogin={() => setLoggedIn(true)} />;
+  }
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-[#0b0b0b]">
+      <div className="sidebar w-20 md:w-64 flex-shrink-0 flex flex-col p-3 overflow-y-auto">
+        <div className="text-orange-500 font-bold text-2xl mb-6 hidden md:block">🍕 KP</div>
+        <div className="space-y-1">
+          {['dashboard', 'pos', 'menu', 'orders', 'customers', 'reports', 'settings'].map(s => (
+            <div key={s} onClick={() => setView(s)} className={`sidebar-item ${view === s ? 'active' : ''}`}>
+              <i className={`fas fa-${s === 'dashboard' ? 'chart-pie' : s === 'pos' ? 'cash-register' : s === 'menu' ? 'utensils' : s === 'orders' ? 'clipboard-list' : s === 'customers' ? 'users' : s === 'reports' ? 'file-alt' : 'cog'}`}></i>
+              <span className="hidden md:inline capitalize">{s}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-auto text-xs text-gray-600 p-2 hidden md:block">v2.0 • Internal</div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        {view === 'dashboard' && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+              {Object.entries(stats).map(([key, val]) => (
+                <div key={key} className="card-glass p-3 text-center">
+                  <div className="text-gray-400 text-xs uppercase">{key.replace(/([A-Z])/g, ' $1')}</div>
+                  <div className="text-xl font-bold text-orange-400">{typeof val === 'number' ? val.toFixed(0) : val}</div>
+                </div>
+              ))}
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="card-glass p-4"><h4 className="font-semibold mb-2">📊 Daily Sales</h4><div className="h-32 flex items-center justify-center text-gray-500">Chart View</div></div>
+              <div className="card-glass p-4"><h4 className="font-semibold mb-2">🏆 Best Sellers</h4><div className="h-32 flex items-center justify-center text-gray-500">Chart View</div></div>
+            </div>
+          </div>
+        )}
+
+        {view === 'pos' && (
+          <div className="grid lg:grid-cols-5 gap-4">
+            <div className="lg:col-span-3">
+              <div className="flex flex-wrap gap-2 mb-3">
+                <input className="input-dark flex-1 min-w-[120px]" placeholder="Search menu..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                <select className="input-dark w-auto" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
+                  <option>All</option>{Object.keys(MENU_DATA).map(c => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="menu-grid max-h-[400px] overflow-y-auto">
+                {filteredMenu.map((item, idx) => (
+                  <div key={idx} className="menu-item" onClick={() => addToCart(item)}>
+                    <div className="text-sm font-medium">{item.name}</div>
+                    <div className="price text-sm">₨ {item.price}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button className={`tab-btn ${orderType === 'Dine In' ? 'active' : ''}`} onClick={() => setOrderType('Dine In')}>Dine In</button>
+                <button className={`tab-btn ${orderType === 'Take Away' ? 'active' : ''}`} onClick={() => setOrderType('Take Away')}>Take Away</button>
+                <button className={`tab-btn ${orderType === 'Delivery' ? 'active' : ''}`} onClick={() => setOrderType('Delivery')}>Delivery</button>
+              </div>
+            </div>
+            <div className="lg:col-span-2 card-glass p-4">
+              <h3 className="font-bold text-lg mb-2">🛒 Cart</h3>
+              <div className="max-h-[300px] overflow-y-auto">
+                {cart.map((item, idx) => (
+                  <div key={idx} className="cart-item flex justify-between items-center">
+                    <div><span className="font-medium">{item.name}</span> <span className="text-orange-400">x{item.qty}</span></div>
+                    <div><span className="text-sm">₨{item.price * item.qty}</span>
+                      <button onClick={() => updateQty(idx, 1)} className="ml-2 text-orange-500">+</button>
+                      <button onClick={() => updateQty(idx, -1)} className="ml-1 text-red-400">-</button>
+                      <button onClick={() => removeItem(idx)} className="ml-2 text-red-500"><i className="fas fa-trash-alt" /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-gray-700 my-3 pt-2 space-y-1 text-sm">
+                <div className="flex justify-between"><span>Subtotal</span><span>₨{calcTotal().subtotal.toFixed(0)}</span></div>
+                <div className="flex justify-between"><span>Tax (10%)</span><span>₨{calcTotal().tax.toFixed(0)}</span></div>
+                <div className="flex justify-between"><span>Discount</span><span>-₨{calcTotal().discount.toFixed(0)}</span></div>
+                <div className="flex justify-between font-bold text-orange-400"><span>Total</span><span>₨{calcTotal().total.toFixed(0)}</span></div>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <select className="input-dark w-full" value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
+                  <option>Cash</option><option>Card</option><option>Bank Transfer</option><option>Mobile Wallet</option>
+                </select>
+                <input className="input-dark w-full" placeholder="Discount %" type="number" value={discount} onChange={e => setDiscount(parseFloat(e.target.value) || 0)} />
+                <input className="input-dark w-full" placeholder="Service Charge" type="number" value={serviceCharge} onChange={e => setServiceCharge(parseFloat(e.target.value) || 0)} />
+                <textarea className="input-dark w-full" placeholder="Cooking notes..." value={notes} onChange={e => setNotes(e.target.value)} rows={1} />
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <label className="text-sm"><input type="checkbox" checked={extraCheese} onChange={e => setExtraCheese(e.target.checked)} /> Extra Cheese</label>
+                <label className="text-sm"><input type="checkbox" checked={extraSauce} onChange={e => setExtraSauce(e.target.checked)} /> Extra Sauce</label>
+                <label className="text-sm"><input type="checkbox" checked={extraToppings} onChange={e => setExtraToppings(e.target.checked)} /> Extra Toppings</label>
+              </div>
+              <button onClick={saveOrder} className="btn-orange w-full py-3 mt-3 rounded-xl text-lg">💳 Save Order</button>
+            </div>
+          </div>
+        )}
+
+        {view === 'orders' && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Orders</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-gray-400 border-b border-gray-800">
+                  <tr><th className="text-left p-2">ID</th><th className="text-left p-2">Date</th><th className="text-left p-2">Customer</th><th className="text-left p-2">Total</th><th className="text-left p-2">Status</th><th className="text-left p-2">Action</th></tr>
+                </thead>
+                <tbody>
+                  {orders.map(o => (
+                    <tr key={o.id} className="border-b border-gray-800/50">
+                      <td className="py-2 px-2 font-mono">{o.id}</td>
+                      <td className="py-2 px-2">{o.date}</td>
+                      <td className="py-2 px-2">{o.customer || 'Walk-in'}</td>
+                      <td className="py-2 px-2">₨{o.total.toFixed(0)}</td>
+                      <td className="py-2 px-2">
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${o.status === 'Completed' ? 'bg-green-900/60 text-green-300' : o.status === 'Cancelled' ? 'bg-red-900/60 text-red-300' : 'bg-yellow-900/60 text-yellow-300'}`}>
+                          {o.status}
+                        </span>
+                      </td>
+                      <td className="py-2 px-2">
+                        <button className="text-orange-400 text-xs"><i className="fas fa-print" /> Receipt</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {view === 'customers' && (
+          <div className="card-glass p-6">
+            <h2 className="text-xl">👥 Customers</h2>
+            <p
