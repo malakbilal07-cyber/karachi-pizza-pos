@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karachi Pizza POS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+    }
+    #root {
+      min-height: 100vh;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #1a1a1a; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f97316, #ea580c); border-radius: 10px; }
+    
+    /* Glassmorphism Card */
+    .glass-card {
+      background: rgba(26, 26, 26, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(249, 115, 22, 0.1);
+      border-radius: 24px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(249, 115, 22, 0.3);
+      box-shadow: 0 8px 40px rgba(249, 115, 22, 0.05);
+      transform: translateY(-2px);
+    }
+    
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #0a0a0a;
+      font-weight: 600;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 1rem;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 30px rgba(249, 115, 22, 0.3);
+    }
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      width: 280px;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      color: #888;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      font-weight: 500;
+      position: relative;
+    }
+    .sidebar-item:hover {
+      color: #fff;
+      background: rgba(249, 115, 22, 0.08);
+    }
+    .sidebar-item.active {
+      color: #f97316;
+      background: rgba(249, 115, 22, 0.12);
+    }
+    .sidebar-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 24px;
+      background: #f97316;
+      border-radius: 0 4px 4px 0;
+    }
+    .sidebar-item i {
+      width: 24px;
+      font-size: 1.1rem;
+    }
+    .sidebar-item .badge {
+      margin-left: auto;
+      background: #f97316;
+      color: #0a0a0a;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    
+    /* Menu Grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .menu-item {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 16px 12px;
+      text-align: center;
+      border: 1px solid transparent;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    .menu-item:hover {
+      border-color: #f97316;
+      background: #222;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(249, 115, 22, 0.08);
+    }
+    .menu-item .price {
+      color: #f97316;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .menu-item .item-icon {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    
+    /* Cart Item */
+    .cart-item {
+      background: #141414;
+      border-radius: 16px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-left: 3px solid #f97316;
+      transition: all 0.3s ease;
+    }
+    .cart-item:hover {
+      background: #1a1a1a;
+    }
+    
+    /* Input Fields */
+    .input-field {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 14px;
+      width: 100%;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #f97316;
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+    }
+    .input-field::placeholder {
+      color: #555;
+    }
+    
+    /* Login */
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, #1a1a1a 0%, #0a0a0a 100%);
+      padding: 20px;
+    }
+    .login-box {
+      background: rgba(20, 20, 20, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(249, 115, 22, 0.15);
+      border-radius: 32px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+    }
+    .login-box .logo {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .login-box .logo .icon {
+      font-size: 4rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .login-box .logo h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .login-box .logo p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 72px;
+        padding: 16px 8px;
+      }
+      .sidebar-item span {
+        display: none;
+      }
+      .sidebar-item .badge {
+        display: none;
+      }
+      .login-box {
+        padding: 32px 24px;
+      }
+      .menu-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+    }
+    @media (max-width: 480px) {
+      .menu-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .glass-card {
+        padding: 12px !important;
+      }
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .fade-in-up {
+      animation: fadeInUp 0.5s ease forwards;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    /* Status Badges */
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-badge.completed {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+    }
+    .status-badge.pending {
+      background: rgba(234, 179, 8, 0.15);
+      color: #eab308;
+    }
+    .status-badge.cancelled {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+    .status-badge.preparing {
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
+    }
+    
+    /* Stats Card */
+    .stat-card {
+      padding: 16px 20px;
+      background: #141414;
+      border-radius: 16px;
+      border: 1px solid #1f1f1f;
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      border-color: #f97316;
+      background: #1a1a1a;
+    }
+    .stat-card .stat-icon {
+      font-size: 1.5rem;
+      color: #f97316;
+      opacity: 0.8;
+    }
+    .stat-card .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 4px;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-card .stat-label {
+      color: #666;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid #1f1f1f;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead {
+      background: #141414;
+    }
+    th {
+      padding: 14px 16px;
+      text-align: left;
+      color: #888;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    td {
+      padding: 12px 16px;
+      border-top: 1px solid #1a1a1a;
+      color: #ddd;
+    }
+    tr:hover td {
+      background: rgba(249, 115, 22, 0.03);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom": "https://esm.sh/react-dom@18.2.0",
+        "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime"
+      }
+    }
+  </script>
+  
+  <script type="module">
+    import React, { useState, useEffect, useMemo, createContext, useContext } from 'react';
+    import ReactDOM from 'react-dom/client';
+    
+    // ============ CONTEXT ============
+    const AppContext = createContext();
+    
+    // ============ MENU DATA ============
+    const MENU_DATA = {
+      '🍕 Pizza': [
+        { name: 'Crown Crust Pizza', variants: [{ size: 'Small', price: 1499 }, { size: 'Medium', price: 1999 }] },
+        { name: 'Lazania Pizza', variants: [{ size: 'Small', price: 1699 }, { size: 'Medium', price: 2199 }] },
+        { name: 'Malai Boti Pizza', variants: [{ size: 'Small', price: 459 }, { size: 'Medium', price: 1099 }, { size: 'Large', price: 1799 }] },
+        { name: 'Fajita Pizza', variants: [{ size: 'Small', price: 450 }, { size: 'Medium', price: 950 }, { size: 'Large', price: 1550 }] },
+        { name: 'Tikka Pizza', variants: [{ size: 'Small', price: 499 }, { size: 'Medium', price: 999 }, { size: 'Large', price: 1499 }] },
+        { name: 'Supreme Pizza', variants: [{ size: 'Small', price: 450 }, { size: 'Medium', price: 999 }, { size: 'Large', price: 1599 }] },
+        { name: 'Hot & Spicy Pizza', variants: [{ size: 'Small', price: 499 }, { size: 'Medium', price: 999 }, { size: 'Large', price: 1499 }] },
+        { name: 'KBS Pizza', variants: [{ size: 'Small', price: 599 }, { size: 'Medium', price: 1199 }, { size: 'Large', price: 1899 }] },
+        { name: 'Extra Toppings', variants: [{ size: 'Small', price: 150 }, { size: 'Medium', price: 250 }, { size: 'Large', price: 350 }] },
+      ],
+      '🍔 Burgers': [
+        { name: 'KBS Special Pizza Burger', price: 499 }, { name: 'Zinger Burger', price: 350 },
+        { name: 'Zinger Cheese Burger', price: 400 }, { name: 'Chicken Grill Burger', price: 300 },
+        { name: 'Chicken Grill Cheese Burger', price: 350 }, { name: 'Classic Chicken Burger', price: 300 },
+        { name: 'Classic Chicken Cheese Burger', price: 250 }, { name: 'Beef Patti Burger', price: 250 },
+        { name: 'Beef Patti Cheese Burger', price: 300 }
+      ],
+      '🥩 BBQ': [
+        { name: 'Chicken Tikka Breast Piece', price: 399 }, { name: 'Chicken Tikka Leg Piece', price: 399 },
+        { name: 'Chicken Tikka Boti Boneless', price: 450 }, { name: 'Malai Boti Boneless', price: 499 },
+        { name: 'Beef Boti', price: 450 }, { name: 'Seekh Kebab 6 pcs', price: 499 },
+        { name: 'Reshmi Kebab 6 pcs', price: 499 }, { name: 'Namkeen Tikka Chicken', price: 499 },
+        { name: 'Namkeen Afghani Beef Boti Seekh', price: 200 }, { name: 'Grill Fish BBQ', price: 0 }
+      ],
+      '🥘 Karahi': [
+        { name: 'Chicken Karahi Full', price: 1999 }, { name: 'Chicken Karahi Half', price: 999 },
+        { name: 'Beef Karahi Full', price: 2499 }, { name: 'Beef Karahi Half', price: 1199 },
+        { name: 'Mutton Karahi Full', price: 3499 }, { name: 'Mutton Karahi Half', price: 1899 }
+      ],
+      '🍲 Handi': [
+        { name: 'Chicken Handi Full', price: 2000 }, { name: 'Chicken Handi Half', price: 1000 },
+        { name: 'Beef Handi Full', price: 1999 }, { name: 'Beef Handi Half', price: 1199 },
+        { name: 'Mutton Handi Full', price: 3299 }, { name: 'Mutton Handi Half', price: 1599 }
+      ],
+      '🥤 Shakes': [
+        { name: 'Mango Juice', price: 250 }, { name: 'Banana Juice', price: 250 },
+        { name: 'Apple Juice', price: 250 }, { name: 'Strawberry Juice', price: 250 }
+      ],
+      '🍦 Ice Cream': [
+        { name: 'Sada Ice Cream', price: 150 }, { name: 'Special Ice Cream', price: 250 },
+        { name: 'Strawberry Ice Cream', price: 250 }
+      ],
+      '🍧 Falooda': [{ name: 'Special Falooda', price: 250 }],
+      '🍛 Biryani': [
+        { name: 'Chicken Biryani Full', price: 400 }, { name: 'Chicken Biryani Half', price: 200 },
+        { name: 'Chicken Biryani Sada', price: 100 }, { name: 'Beef Pulao Full', price: 500 },
+        { name: 'Beef Pulao Half', price: 250 }, { name: 'Sada Pulao', price: 150 }
+      ],
+      '🌯 Rolls': [
+        { name: 'Chicken Shawarma', price: 200 }, { name: 'Chicken Cheese Shawarma', price: 250 },
+        { name: 'Shawarma Platter', price: 350 }, { name: 'Chicken Tikka Roll', price: 250 },
+        { name: 'Beef Garlic Roll', price: 250 }
+      ],
+      '🍟 Fries': [
+        { name: 'KBS Pizza Fries', price: 599 }, { name: 'Loaded Fries', price: 499 },
+        { name: 'Masala Fries', price: 250 }, { name: 'Masala Cheese Fries', price: 300 },
+        { name: 'Plain Fries', price: 200 }
+      ]
+    };
+
+    const flatMenu = [];
+    Object.entries(MENU_DATA).forEach(([category, items]) => {
+      items.forEach(item => {
+        if (item.variants) {
+          item.variants.forEach(v => {
+            flatMenu.push({ name: `${item.name} (${v.size})`, price: v.price, category, size: v.size });
+          });
+        } else {
+          flatMenu.push({ name: item.name, price: item.price, category });
+        }
+      });
+    });
+
+    let ordersDB = [];
+
+    // ============ LOGIN COMPONENT ============
+    const Login = ({ onLogin }) => {
+      const [username, setUsername] = useState('');
+      const [password, setPassword] = useState('');
+      const [error, setError] = useState('');
+      const [loading, setLoading] = useState(false);
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        if (username === 'manager' && password === '1234') {
+          onLogin();
+        } else {
+          setError('Invalid credentials. Use: manager / 1234');
+        }
+        setLoading(false);
+      };
+
+      return (
+        <div className="login-container">
+          <div className="login-box fade-in-up">
+            <div className="logo">
+              <span className="icon">🍕</span>
+              <h1>Karachi Pizza</h1>
+              <p>Premium Restaurant POS System</p>
+            </div>
+            
+            <form onSubmit={handleSubmit}>
+              {error && (
+                <div style={{
+                  background: 'rgba(239,68,68,0.1)',
+                  border: '1px solid rgba(239,68,68,0.2)',
+                  color: '#ef4444',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.9rem'
+                }}>
+                  <i className="fas fa-exclamation-circle"></i>
+                  {error}
+                </div>
+              )}
+              
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: '#888', fontSize: '0.85rem', marginBottom: '6px', fontWeight: '500' }}>
+                  <i className="fas fa-user" style={{ marginRight: '8px' }}></i>
+                  Username
+                </label>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Enter username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', color: '#888', fontSize: '0.85rem', marginBottom: '6px', fontWeight: '500' }}>
+                  <i className="fas fa-lock" style={{ marginRight: '8px' }}></i>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  className="input-field"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <button type="submit" className="btn-primary" style={{ width: '100%', padding: '14px', fontSize: '1.05rem' }} disabled={loading}>
+                {loading ? (
+                  <i className="fas fa-spinner fa-spin"></i>
+                ) : (
+                  <><i className="fas fa-sign-in-alt" style={{ marginRight: '10px' }}></i> Sign In</>
+                )}
+              </button>
+            </form>
+            
+            <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #1f1f1f' }}>
+              <div style={{ 
+                background: '#141414', 
+                borderRadius: '12px', 
+                padding: '12px 16px',
+                border: '1px solid #1f1f1f'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#666', fontSize: '0.85rem', padding: '4px 0' }}>
+                  <span>Demo Username:</span>
+                  <span style={{ color: '#f97316', fontWeight: '600' }}>manager</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#666', fontSize: '0.85rem', padding: '4px 0' }}>
+                  <span>Demo Password:</span>
+                  <span style={{ color: '#f97316', fontWeight: '600' }}>1234</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ============ MAIN APP ============
+    const App = () => {
+      const [loggedIn, setLoggedIn] = useState(false);
+      const [view, setView] = useState('dashboard');
+      const [cart, setCart] = useState([]);
+      const [orderType, setOrderType] = useState('Dine In');
+      const [paymentMethod, setPaymentMethod] = useState('Cash');
+      const [discount, setDiscount] = useState(0);
+      const [tax] = useState(0.1);
+      const [serviceCharge, setServiceCharge] = useState(0);
+      const [orders, setOrders] = useState([]);
+      const [selectedCategory, setSelectedCategory] = useState('All');
+      const [searchTerm, setSearchTerm] = useState('');
+      const [notifications, setNotifications] = useState([]);
+      const [darkMode, setDarkMode] = useState(true);
+
+      useEffect(() => {
+        if (ordersDB.length === 0) {
+          for (let i = 0; i < 12; i++) {
+            const randItem = flatMenu[Math.floor(Math.random() * flatMenu.length)];
+            const statuses = ['Pending', 'Preparing', 'Ready', 'Completed', 'Cancelled'];
+            ordersDB.push({
+              id: 'ORD' + String(i + 100).padStart(3, '0'),
+              date: new Date(Date.now() - i * 3600000).toLocaleString(),
+              items: [{ ...randItem, qty: 1 + Math.floor(Math.random() * 3) }],
+              orderType: ['Dine In', 'Take Away', 'Delivery'][i % 3],
+              paymentMethod: ['Cash', 'Card', 'Bank Transfer', 'Mobile Wallet'][i % 4],
+              subtotal: randItem.price * 2,
+              tax: randItem.price * 0.1,
+              discount: 0,
+              serviceCharge: 50,
+              total: randItem.price * 2 * 1.1 + 50,
+              status: statuses[i % 5],
+              customer: ['Ali Khan', 'Sara Ahmed', 'Usman Malik', 'Fatima Noor', 'Ahmed Raza', 'Zara Ali'][i % 6]
+            });
+          }
+          setOrders([...ordersDB]);
+        }
+      }, []);
+
+      const addToCart = (item) => {
+        const existing = cart.find(i => i.name === item.name && i.size === item.size);
+        if (existing) {
+          setCart(cart.map(i => i.name === item.name && i.size === item.size ? { ...i, qty: i.qty + 1 } : i));
+        } else {
+          setCart([...cart, { ...item, qty: 1 }]);
+        }
+        setNotifications([...notifications, { id: Date.now(), message: `Added ${item.name}`, type: 'success' }]);
+      };
+
+      const removeItem = (idx) => setCart(cart.filter((_, i) => i !== idx));
+      const updateQty = (idx, delta) => {
+        const newCart = [...cart];
+        if (newCart[idx].qty + delta <= 0) { newCart.splice(idx, 1); } else { newCart[idx].qty += delta; }
+        setCart(newCart);
+      };
+
+      const calcTotal = () => {
+        let sub = cart.reduce((acc, i) => acc + (i.price || 0) * i.qty, 0);
+        let taxAmt = sub * tax;
+        let discAmt = sub * (discount / 100);
+        let total = sub + taxAmt + serviceCharge - discAmt;
+        return { subtotal: sub, tax: taxAmt, discount: discAmt, total };
+      };
+
+      const saveOrder = () => {
+        if (cart.length === 0) { 
+          setNotifications([...notifications, { id: Date.now(), message: 'Cart is empty!', type: 'error' }]);
+          return; 
+        }
+        const { subtotal, tax: taxAmt, discount: discAmt, total } = calcTotal();
+        const order = {
+          id: 'ORD' + String(ordersDB.length + 1).padStart(3, '0'),
+          date: new Date().toLocaleString(),
+          items: cart,
+          orderType, paymentMethod, subtotal, tax: taxAmt, discount: discAmt, serviceCharge, total,
+          status: 'Completed', customer: 'Walk-in'
+        };
+        ordersDB = [order, ...ordersDB];
+        setOrders([...ordersDB]);
+        setCart([]);
+        setDiscount(0);
+        setServiceCharge(0);
+        setNotifications([...notifications, { id: Date.now(), message: `✅ Order #${order.id} saved!`, type: 'success' }]);
+      };
+
+      const stats = useMemo(() => {
+        const today = new Date().toDateString();
+        const todayOrders = orders.filter(o => new Date(o.date).toDateString() === today);
+        const totalSales = todayOrders.reduce((s, o) => s + o.total, 0);
+        const customers = [...new Set(todayOrders.map(o => o.customer).filter(Boolean))];
+        return {
+          todaySales: totalSales,
+          todayCustomers: customers.length,
+          todayOrders: todayOrders.length,
+          pending: orders.filter(o => o.status === 'Pending').length,
+          completed: orders.filter(o => o.status === 'Completed').length,
+          cancelled: orders.filter(o => o.status === 'Cancelled').length,
+          preparing: orders.filter(o => o.status === 'Preparing').length,
+          ready: orders.filter(o => o.status === 'Ready').length,
+          cash: orders.filter(o => o.paymentMethod === 'Cash').reduce((s, o) => s + o.total, 0),
+          card: orders.filter(o => o.paymentMethod === 'Card').reduce((s, o) => s + o.total, 0),
+          bank: orders.filter(o => o.paymentMethod === 'Bank Transfer').reduce((s, o) => s + o.total, 0),
+          wallet: orders.filter(o => o.paymentMethod === 'Mobile Wallet').reduce((s, o) => s + o.total, 0),
+          totalRevenue: orders.reduce((s, o) => s + o.total, 0),
+          avgOrder: orders.length ? orders.reduce((s, o) => s + o.total, 0) / orders.length : 0
+        };
+      }, [orders]);
+
+      const filteredMenu = useMemo(() => {
+        let items = flatMenu;
+        if (selectedCategory !== 'All') items = items.filter(i => i.category === selectedCategory);
+        if (searchTerm) items = items.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        return items;
+      }, [selectedCategory, searchTerm]);
+
+      const sidebarItems = [
+        { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard', badge: null },
+        { id: 'pos', icon: 'fa-cash-register', label: 'POS Billing', badge: cart.length > 0 ? cart.length : null },
+        { id: 'orders', icon: 'fa-clipboard-list', label: 'Orders', badge: orders.filter(o => o.status === 'Pending').length || null },
+        { id: 'menu', icon: 'fa-utensils', label: 'Menu', badge: null },
+        { id: 'customers', icon: 'fa-users', label: 'Customers', badge: null },
+        { id: 'reports', icon: 'fa-file-alt', label: 'Reports', badge: null },
+        { id: 'settings', icon: 'fa-cog', label: 'Settings', badge: null },
+      ];
+
+      if (!loggedIn) {
+        return <Login onLogin={() => setLoggedIn(true)} />;
+      }
+
+      return (
+        <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a' }}>
+          {/* Sidebar */}
+          <div className="sidebar">
+            <div style={{ padding: '8px 12px', marginBottom: '20px' }}>
+              <span style={{ fontSize: '1.8rem', fontWeight: '800', background: 'linear-gradient(135deg, #f97316, #ea580c)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                🍕 KP
+              </span>
+            </div>
+            
+            {sidebarItems.map(item => (
+              <div
+                key={item.id}
+                className={`sidebar-item ${view === item.id ? 'active' : ''}`}
+                onClick={() => setView(item.id)}
+              >
+                <i className={`fas ${item.icon}`}></i>
+                <span>{item.label}</span>
+                {item.badge && <span className="badge">{item.badge}</span>}
+              </div>
+            ))}
+            
+            <div style={{ marginTop: 'auto', padding: '12px 16px', borderTop: '1px solid #1a1a1a', color: '#444', fontSize: '0.75rem' }}>
+              <i className="fas fa-shield-alt" style={{ marginRight: '6px' }}></i>
+              v3.0 • Internal Use Only
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div style={{ flex: 1, overflow: 'auto', padding: '24px', maxHeight: '100vh' }}>
+            {/* Notification Banner */}
+            {notifications.length > 0 && (
+              <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 1000, maxWidth: '400px' }}>
+                {notifications.slice(-3).map(n => (
+                  <div key={n.id} style={{
+                    background: n.type === 'success' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                    border: `1px solid ${n.type === 'success' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                    color: n.type === 'success' ? '#22c55e' : '#ef4444',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    marginBottom: '8px',
+                    backdropFilter: 'blur(10px)',
+                    fontSize: '0.9rem',
+                    animation: 'fadeInUp 0.3s ease'
+                  }}>
+                    {n.message}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Dashboard View */}
+            {view === 'dashboard' && (
+              <div className="fade-in-up">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: '700' }}>
+                    <i className="fas fa-chart-pie" style={{ color: '#f97316', marginRight: '12px' }}></i>
+                    Dashboard
+                  </h2>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <span style={{ color: '#666', fontSize: '0.9rem' }}>
+                      <i className="fas fa-calendar-alt" style={{ marginRight: '6px' }}></i>
+                      {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Stats Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                  {[
+                    { label: 'Today\'s Sales', value: `₨${stats.todaySales.toFixed(0)}`, icon: 'fa-coins' },
+                    { label: 'Today\'s Orders', value: stats.todayOrders, icon: 'fa-shopping-cart' },
+                    { label: 'Total Revenue', value: `₨${stats.totalRevenue.toFixed(0)}`, icon: 'fa-wallet' },
+                    { label: 'Avg Order', value: `₨${stats.avgOrder.toFixed(0)}`, icon: 'fa-chart-line' },
+                    { label: 'Pending', value: stats.pending, icon: 'fa-clock', color: '#eab308' },
+                    { label: 'Completed', value: stats.completed, icon: 'fa-check-circle', color: '#22c55e' },
+                    { label: 'Cancelled', value: stats.cancelled, icon: 'fa-times-circle', color: '#ef4444' },
+                  ].map((stat, i) => (
+                    <div key={i} className="stat-card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span className="stat-label">{stat.label}</span>
+                        <i className={`fas ${stat.icon}`} style={{ color: stat.color || '#f97316', fontSize: '1.2rem' }}></i>
+                      </div>
+                      <div className="stat-value">{stat.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Payment Methods */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                  {[
+                    { label: 'Cash', value: stats.cash, icon: 'fa-money-bill-wave' },
+                    { label: 'Card', value: stats.card, icon: 'fa-credit-card' },
+                    { label: 'Bank Transfer', value: stats.bank, icon: 'fa-university' },
+                    { label: 'Mobile Wallet', value: stats.wallet, icon: 'fa-mobile-alt' },
+                  ].map((method, i) => (
+                    <div key={i} className="glass-card" style={{ padding: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <i className={`fas ${method.icon}`} style={{ color: '#f97316', fontSize: '1.2rem' }}></i>
+                        <div>
+                          <div style={{ color: '#666', fontSize: '0.75rem', textTransform: 'uppercase' }}>{method.label}</div>
+                          <div style={{ fontWeight: '600' }}>₨{method.value.toFixed(0)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Charts Placeholder */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+                  <div className="glass-card" style={{ padding: '20px' }}>
+                    <h4 style={{ marginBottom: '16px', color: '#888' }}>📊 Daily Sales Trend</h4>
+                    <div style={{ height: '200px', display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
+                      {[65, 78, 45, 92, 80, 70, 85].map((val, i) => (
+                        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                          <div style={{ 
+                            height: `${val}%`, 
+                            width: '100%', 
+                            background: 'linear-gradient(180deg, #f97316, #ea580c)',
+                            borderRadius: '4px 4px 0 0',
+                            minHeight: '10px'
+                          }}></div>
+                          <span style={{ fontSize: '0.6rem', color: '#666' }}>{['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="glass-card" style={{ padding: '20px' }}>
+                    <h4 style={{ marginBottom: '16px', color: '#888' }}>🏆 Best Sellers</h4>
+                    {flatMenu.slice(0, 5).map((item, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #1a1a1a' }}>
+                        <span style={{ color: '#ddd' }}>{item.name}</span>
+                        <span style={{ color: '#f97316' }}>₨{item.price}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* POS View */}
+            {view === 'pos' && (
+              <div className="fade-in-up">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <h2 style={{ fontSize: '1.8rem', fontWeight: '700' }}>
+                    <i className="fas fa-cash-register" style={{ color: '#f97316', marginRight: '12px' }}></i>
+                    Point of Sale
+                  </h2>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button className="btn-primary" style={{ padding: '8px 20px', fontSize: '0.85rem' }} onClick={() => setCart([])}>
+                      <i className="fas fa-trash-alt" style={{ marginRight: '6px' }}></i> Clear Cart
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '24px' }}>
+                  {/* Menu */}
+                  <div>
+                    <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                      <input
+                        className="input-field"
+                        placeholder="🔍 Search menu..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ flex: 1 }}
+                      />
+                      <select
+                        className="input-field"
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        style={{ width: '200px' }}
+                      >
+                        <option>All</option>
+                        {Object.keys(MENU_DATA).map(c => <option key={c}>{c}</option>)}
+                      </select>
+                    </div>
+
+                    <div className="menu-grid">
+                      {filteredMenu.map((item, idx) => (
+                        <div key={idx} className="menu-item" onClick={() => addToCart(item)}>
+                          <div className="item-icon">🍽️</div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: '500', marginBottom: '4px', color: '#ddd' }}>{item.name}</div>
+                          <div className="price">₨ {item.price}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ marginTop: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      {['Dine In', 'Take Away', 'Delivery'].map(type => (
+                        <button
+                          key={type}
+                          className={`tab-btn ${orderType === type ? 'active' : ''}`}
+                          onClick={() => setOrderType(type)}
+                          style={{
+                            padding: '10px 24px',
+                            borderRadius: '40px',
+                            background: orderType === type ? '#f97316' : '#1a1a1a',
+                            color: orderType === type ? '#0a0a0a' : '#888',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontWeight: '500',
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          <i className={`fas fa-${type === 'Dine In' ? 'utensils' : type === 'Take Away' ? 'box' : 'truck'}`} style={{ marginRight: '6px' }}></i>
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Cart */}
+                  <div className="glass-card" style={{ padding: '20px', position: 'sticky', top: '20px', maxHeight: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <h3 style={{ fontSize: '1.1rem' }}>
+                        <i className="fas fa-shopping-cart" style={{ color: '#f97316', marginRight: '8px' }}></i>
+                        Cart <span style={{ color: '#666', fontSize: '0.8rem' }}>({cart.length} items)</span>
+                      </h3>
+                    </div>
+
+                    <div style={{ flex: 1, overflow: 'auto', marginBottom: '16px' }}>
+                      {cart.length === 0 ? (
+                        <div style={{ textAlign: 'center', color: '#555', padding: '40px 0' }}>
+                          <i className="fas fa-shopping-basket" style={{ fontSize: '2.5rem', marginBottom: '12px', display: 'block' }}></i>
+                          <p>Cart is empty</p>
+                          <p style={{ fontSize: '0.8rem' }}>Click menu items to add</p>
+                        </div>
+                      ) : (
+                        cart.map((item, idx) => (
+                          <div key={idx} className="cart-item">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <div style={{ fontWeight: '500', fontSize: '0.9rem' }}>{item.name}</div>
+                                <div style={{ color: '#f97316', fontSize: '0.85rem' }}>₨{item.price}</div>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <button
+                                  onClick={() => updateQty(idx, -1)}
+                                  style={{ background: 'transparent', border: '1px solid #333', color: '#fff', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer' }}
+                                >
+                                  −
+                                </button>
+                                <span style={{ fontWeight: '600', minWidth: '24px', textAlign: 'center' }}>{item.qty}</span>
+                                <button
+                                  onClick={() => updateQty(idx, 1)}
+                                  style={{ background: '#f97316', border: 'none', color: '#0a0a0a', width: '28px', height: '28px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700' }}
+                                >
+                                  +
+                                </button>
+                                <button
+                                  onClick={() => removeItem(idx)}
+                                  style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', marginLeft: '4px' }}
+                                >
+                                  <i className="fas fa-times"></i>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <div style={{ borderTop: '1px solid #1f1f1f', paddingTop: '16px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', padding: '4px 0' }}>
+                        <span style={{ color: '#888' }}>Subtotal</span>
+                        <span>₨{calcTotal().subtotal.toFixed(0)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', padding: '4px 0' }}>
+                        <span style={{ color: '#888' }}>Tax (10%)</span>
+                        <span>₨{calcTotal().tax.toFixed(0)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', padding: '4px 0' }}>
+                        <span style={{ color: '#888' }}>Discount</span>
+                        <span style={{ color: '#22c55e' }}>-₨{calcTotal().discount.toFixed(0)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: '700', padding: '8px 0', borderTop: '1px solid #1f1f1f', marginTop: '4px' }}>
+                        <span>Total</span>
+                        <span style={{ color: '#f97316' }}>₨{calcTotal().total.toFixed(0)}</span>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '12px' }}>
+                      <select
+                        className="input-field"
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        style={{ marginBottom: '8px' }}
+                      >
+                        <option>Cash</option>
+                        <option>Card</option>
+                        <option>Bank Transfer</option>
+                        <option>Mobile Wallet</option>
+                      </select>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          className="input-field"
+                          placeholder="Discount %"
+                          type="number"
+                          value={discount}
+                          onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                          style={{ flex: 1 }}
+                        />
+                        <input
+                          className="input-field"
+                          placeholder="Service Charge"
+                          type="number"
+                          value={serviceCharge}
+                          onChange={(e) => setServiceCharge(parseFloat(e.target.value) || 0)}
+                          style={{ flex: 1 }}
+                        />
+                      </div>
+                      <button className="btn-primary" style={{ width: '100%', marginTop: '12px', padding: '14px' }} onClick={saveOrder}>
+                        <i className="fas fa-check-circle" style={{ marginRight: '8px' }}></i>
+                        Complete Order
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Orders View */}
+            {view === 'orders' && (
+              <div className="fade-in-up">
+                <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '20px' }}>
+                  <i className="fas fa-clipboard-list" style={{ color: '#f97316', marginRight: '12px' }}></i>
+                  Order Management
+                </h2>
+                
+                <div className="glass-card" style={{ padding: '20px' }}>
+                  <div className="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Order ID</th>
+                          <th>Date & Time</th>
+                          <th>Customer</th>
+                          <th>Items</th>
+                          <th>Total</th>
+                          <th>Payment</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orders.map(o => (
+                          <tr key={o.id}>
+                            <td><span style={{ fontFamily: 'monospace', color: '#f97316' }}>{o.id}</span></td>
+                            <td>{o.date}</td>
+                            <td>{o.customer}</td>
+                            <td>{o.items.length} items</td>
+                            <td><strong>₨{o.total.toFixed(0)}</strong></td>
+                            <td>{o.paymentMethod}</td>
+                            <td>
+                              <span className={`status-badge ${o.status.toLowerCase()}`}>
+                                {o.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Menu View */}
+            {view === 'menu' && (
+              <div className="fade-in-up">
+                <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '20px' }}>
+                  <i className="fas fa-utensils" style={{ color: '#f97316', marginRight: '12px' }}></i>
+                  Menu Management
+                </h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
+                  {Object.entries(MENU_DATA).map(([category, items]) => (
+                    <div key={category} className="glass-card" style={{ padding: '20px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <h4 style={{ fontSize: '1.1rem' }}>{category}</h4>
+                        <span style={{ background: '#f97316', color: '#0a0a0a', padding: '2px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: '700' }}>
+                          {items.length}
+                        </span>
+                      </div>
+                      <div style={{ color: '#666', fontSize: '0.85rem' }}>
+                        {items.slice(0, 3).map((item, i) => (
+                          <div key={i} style={{ padding: '4px 0', borderBottom: '1px solid #1a1a1a' }}>
+                            {item.name} <span style={{ color: '#f97316', float: 'right' }}>₨{item.price || item.variants?.[0]?.price}</span>
+                          </div>
+                        ))}
+                        {items.length > 3 && <div style={{ color: '#444', marginTop: '4px' }}>+{items.length - 3} more</div>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Customers View */}
+            {view === 'customers' && (
+              <div className="fade-in-up">
+                <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '20px' }}>
+                  <i className="fas fa-users" style={{ color: '#f97316', marginRight: '12px' }}></i>
+                  Customer Management
+                </h2>
+                <div className="glass-card" style={{ padding: '20px' }}>
+                  <div className="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Customer</th>
+                          <th>Phone</th>
+                          <th>Email</th>
+                          <th>Total Orders</th>
+                          <th>Total Spending</th>
+                          <th>Last Visit</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { name: 'Ali Khan', phone: '+92 300 1234567', email: 'ali@email.com', orders: 12, spent: 12450, last: '2026-07-02' },
+                          { name: 'Sara Ahmed', phone: '+92 301 7654321', email: 'sara@email.com', orders: 8, spent: 8200, last: '2026-07-01' },
+                          { name: 'Usman Malik', phone: '+92 302 9876543', email: 'usman@email.com', orders: 5, spent: 5600, last: '2026-06-30' },
+                          { name: 'Fatima Noor', phone: '+92 303 4567890', email: 'fatima@email.com', orders: 3, spent: 3450, last: '2026-06-28' },
+                        ].map((c, i) => (
+                          <tr key={i}>
+                            <td><strong>{c.name}</strong></td>
+                            <td>{c.phone}</td>
+                            <td>{c.email}</td>
+                            <td>{c.orders}</td>
+                            <td>₨{c.spent}</td>
+                            <td>{c.last}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Reports View */}
+            {view === 'reports' && (
+              <div className="fade-in-up">
+                <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '20px' }}>
+                  <i className="fas fa-file-alt" style={{ color: '#f97316', marginRight: '12px' }}></i>
+                  Reports & Analytics
+                </h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+                  {['Daily Sales', 'Weekly Report', 'Monthly Report', 'Yearly Report', 'Customer Report', 'Best Sellers', 'Payment Summary', 'Profit & Loss'].map((report, i) => (
+                    <div key={i} className="glass-card" style={{ padding: '20px', textAlign: 'center' }}>
+                      <i className={`fas fa-${['fa-calendar-day', 'fa-calendar-week', 'fa-calendar-alt', 'fa-calendar-year', 'fa-users', 'fa-trophy', 'fa-credit-card', 'fa-chart-line'][i]}`} style={{ fontSize: '2rem', color: '#f97316', marginBottom: '8px', display: 'block' }}></i>
+                      <div style={{ fontWeight: '600', marginBottom: '4px' }}>{report}</div>
+                      <button className="btn-primary" style={{ padding: '6px 16px', fontSize: '0.75rem', marginTop: '8px' }}>
+                        <i className="fas fa-download" style={{ marginRight: '4px' }}></i> Export
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Settings View */}
+            {view === 'settings' && (
+              <div className="fade-in-up">
+                <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '20px' }}>
+                  <i className="fas fa-cog" style={{ color: '#f97316', marginRight: '12px' }}></i>
+                  Settings
+                </h2>
+                <div className="glass-card" style={{ padding: '24px', maxWidth: '600px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div>
+                      <label style={{ color: '#888', fontSize: '0.85rem', marginBottom: '4px', display: 'block' }}>Restaurant Name</label>
+                      <input className="input-field" defaultValue="Karachi Pizza & Fast Food" />
+                    </div>
+                    <div>
+                      <label style={{ color: '#888', fontSize: '0.85rem', marginBottom: '4px', display: 'block' }}>Address</label>
+                      <input className="input-field" defaultValue="123 Food Street, Karachi, Pakistan" />
+                    </div>
+                    <div>
+                      <label style={{ color: '#888', fontSize: '0.85rem', marginBottom: '4px', display: 'block' }}>Phone Number</label>
+                      <input className="input-field" defaultValue="+92 300 1234567" />
+                    </div>
+                    <div>
+                      <label style={{ color: '#888', fontSize: '0.85rem', marginBottom: '4px', display: 'block' }}>WhatsApp</label>
+                      <input className="input-field" defaultValue="+92 300 1234567" />
+                    </div>
+                    <div>
+                      <label style={{ color: '#888', fontSize: '0.85rem', marginBottom: '4px', display: 'block' }}>Tax Percentage (%)</label>
+                      <input className="input-field" type="number" defaultValue="10" />
+                    </div>
+                    <div>
+                      <label style={{ color: '#888', fontSize: '0.85rem', marginBottom: '4px', display: 'block' }}>Currency</label>
+                      <input className="input-field" defaultValue="PKR" />
+                    </div>
+                    <button className="btn-primary" style={{ marginTop: '8px' }}>
+                      <i className="fas fa-save" style={{ marginRight: '8px' }}></i>
+                      Save Settings
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
